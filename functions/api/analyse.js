@@ -41,6 +41,6 @@ export async function onRequestPost({ request, env }) {
     if (a === -1 || b === -1) throw new Error("No JSON found");
     return json(JSON.parse(raw.slice(a, b + 1)));
   } catch (e) {
-    return json({ error: "The analysis failed. Please try again." }, 500);
+    return json({ error: "The analysis failed: " + (e && e.message ? e.message : String(e)) }, 500);;
   }
 }
