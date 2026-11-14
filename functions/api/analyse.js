@@ -25,7 +25,7 @@ export async function onRequestPost({ request, env }) {
     ". You may add others such as health, safety or personal risk when relevant.";
 
   try {
-    const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
+    const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct-fp8", {
       messages: [
         { role: "system", content: system },
         { role: "user", content: "Scenario: " + scenario },
