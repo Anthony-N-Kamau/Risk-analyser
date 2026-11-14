@@ -58,5 +58,5 @@ export async function onRequestPost({ request, env }) {
       lastError = model + ": " + (e && e.message ? e.message : String(e));
     }
   }
-  return json({ error: "The analysis failed: " + lastError }, 500)
+  return json({ error: "The analysis failed: " + lastError }, 500);
 }
