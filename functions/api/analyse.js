@@ -24,23 +24,39 @@ export async function onRequestPost({ request, env }) {
     "Use only risks that genuinely apply. Starting list of categories: " + categories +
     ". You may add others such as health, safety or personal risk when relevant.";
 
-  try {
-    const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct-fp8", {
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: "Scenario: " + scenario },
-      ],
-      max_tokens: 1800,
-    });
+  // Models are tried in order; the first one that works is used.
+  const models = [
+    "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "@cf/meta/llama-3.1-8b-instruct-fp8",
+    "@cf/meta/llama-3.2-3b-instruct",
+  ];
 
-    let raw = result.response;
-    if (raw && typeof raw === "object") return json(raw);
-    raw = String(raw || "");
-    const a = raw.indexOf("{");
-    const b = raw.lastIndexOf("}");
-    if (a === -1 || b === -1) throw new Error("No JSON found");
-    return json(JSON.parse(raw.slice(a, b + 1)));
-  } catch (e) {
-    return json({ error: "The analysis failed: " + (e && e.message ? e.message : String(e)) }, 500);;
+  let lastError = "";
+  for (const model of models) {
+    try {
+      const result = await env.AI.run(model, {
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: "Scenario: " + scenario },
+        ],
+        max_tokens: 1800,
+      });
+
+      let raw = result.response;
+      if (raw === undefined || raw === null) {
+        raw = result.choices && result.choices[0] && result.choices[0].message
+          ? result.choices[0].message.content
+          : "";
+      }
+      if (raw && typeof raw === "object") return json(raw);
+      raw = String(raw || "");
+      const a = raw.indexOf("{");
+      const b = raw.lastIndexOf("}");
+      if (a === -1 || b === -1) throw new Error("No JSON found in reply");
+      return json(JSON.parse(raw.slice(a, b + 1)));
+    } catch (e) {
+      lastError = model + ": " + (e && e.message ? e.message : String(e));
+    }
   }
+  return json({ error: "The analysis failed: " + lastError }, 500);
 }
