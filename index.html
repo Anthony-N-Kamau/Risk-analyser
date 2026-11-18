@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Risk Analyser: financial risk analysis for any plan</title>
+<meta name="description" content="Describe a plan and get an executive risk dashboard: score, capital at risk, risk matrix and a detailed risk ledger.">
+<script>try{var t=localStorage.getItem("ra_theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0e14;--sf:#131722;--sf2:#181d2b;--bd:#22283a;--ink:#e6e9f0;--mu:#8b94a7;--ac:#2563eb;--hi:#ef4444;--md:#f59e0b;--lo:#10b981;
+--ui:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;--disp:"Big Shoulders Display","Arial Narrow",Impact,sans-serif}
+[data-theme=light]{--bg:#f8fafc;--sf:#fff;--sf2:#f1f5f9;--bd:#e2e8f0;--ink:#0f172a;--mu:#64748b}
+@media print{:root{--bg:#fff;--sf:#fff;--sf2:#f1f5f9;--bd:#e2e8f0;--ink:#0f172a;--mu:#64748b}}
+*{box-sizing:border-box}[hidden]{display:none!important}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 .95rem/1.55 var(--ui)}
+.w{max-width:1180px;margin:0 auto;padding:0 20px}.m{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer}:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.sev-High{--c:var(--hi);--t:rgba(239,68,68,.1)}.sev-Medium{--c:var(--md);--t:rgba(245,158,11,.1)}.sev-Low{--c:var(--lo);--t:rgba(16,185,129,.1)}
+/* loader */
+#ld{position:fixed;inset:0;z-index:100;background:var(--ac);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;transition:transform .7s cubic-bezier(.7,0,.2,1)}
+#ld.done{transform:translateY(-101%)}#ld span{font:800 1.1rem var(--disp);letter-spacing:.14em;text-transform:uppercase}
+#ld b{font:900 clamp(6rem,26vw,18rem)/.8 var(--disp)}
+/* nav */
+.nav{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--bd)}
+.nv{display:flex;align-items:center;justify-content:space-between;height:56px;gap:8px}
+.brand{display:flex;gap:9px;align-items:center;font-weight:600;letter-spacing:-.01em}
+.nav nav{display:flex;gap:6px;align-items:center}
+.nb{background:transparent;border:1px solid transparent;border-radius:6px;padding:7px 11px;font-size:.88rem;color:var(--mu);transition:all .15s ease-out}
+.nb:hover{color:var(--ink);background:var(--sf);border-color:var(--bd)}
+.dd{position:relative}#svm{position:absolute;right:0;top:calc(100% + 6px);width:290px;background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+.si{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:6px;font-size:.88rem}.si:hover{background:var(--sf2)}
+.si button{background:none;border:0;text-align:left;flex:1}.si .x{flex:0;color:var(--mu)}.em{padding:10px;color:var(--mu);font-size:.85rem}
+/* hero */
+.hero{padding:clamp(28px,6vw,64px) 0 22px}
+h1{margin:0 0 14px;font:900 clamp(3rem,11vw,8rem)/.86 var(--disp);text-transform:uppercase;letter-spacing:-.01em}
+h1 span{display:block}h1 .o{color:transparent;-webkit-text-stroke:2px var(--ink)}h1 .a{color:var(--ac)}
+.lead{max-width:38em;color:var(--mu);font-size:1.05rem;margin:0}
+.tick{border-block:1px solid var(--bd);overflow:hidden;margin:26px 0 30px;background:var(--sf)}
+.tr{display:flex;width:max-content;animation:run 55s linear infinite}.tick:hover .tr{animation-play-state:paused}
+.tr span{font:800 1.15rem var(--disp);text-transform:uppercase;letter-spacing:.08em;padding:10px 20px;white-space:nowrap;color:var(--mu)}.tr span:nth-child(even){color:var(--ac)}
+@keyframes run{to{transform:translateX(-50%)}}
+/* command */
+.cmd{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:18px}
+.cmd label.t{display:block;font-size:.8rem;font-weight:500;color:var(--mu);margin-bottom:8px}
+textarea,.fld input,.fld select{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--bd);border-radius:8px;font:inherit;padding:11px 13px;transition:border-color .15s ease-out}
+textarea{min-height:104px;resize:vertical;font-size:1.02rem}textarea:focus,.fld input:focus,.fld select:focus{outline:none;border-color:var(--ac)}
+.pr{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.pill{padding:6px 12px;border:1px solid var(--bd);background:transparent;border-radius:99px;font-size:.84rem;color:var(--mu);transition:all .15s ease-out}.pill:hover{border-color:var(--ac);color:var(--ink)}
+details.fp{border-top:1px solid var(--bd);margin-top:6px;padding-top:10px}details.fp summary{cursor:pointer;font-size:.88rem;font-weight:500;color:var(--mu);list-style:none}
+details.fp summary::before{content:"+ ";font-family:var(--mono)}details.fp[open] summary::before{content:"– "}
+.fg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}.fld label{display:block;font-size:.78rem;color:var(--mu);margin-bottom:5px}
+.act{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}.ct{font-size:.8rem;color:var(--mu)}
+.cta{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:12px 22px;font-weight:600;transition:filter .15s ease-out}.cta:hover:not(:disabled){filter:brightness(1.12)}.cta:disabled{opacity:.55}
+/* results */
+#res{padding:34px 0 20px;scroll-margin-top:70px}
+.bar{position:sticky;top:56px;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--bd);margin-bottom:16px}
+.bar h2{margin:0;font-size:1.15rem;letter-spacing:-.01em}.bar small{display:block;color:var(--mu);font-size:.8rem;font-weight:400}
+.ex{display:flex;gap:6px;flex-wrap:wrap}.bt{border:1px solid var(--bd);background:var(--sf);border-radius:7px;padding:7px 12px;font-size:.84rem;transition:all .15s ease-out}.bt:hover{border-color:var(--ac)}.bt.p{background:var(--ac);border-color:var(--ac);color:#fff}
+.adj{display:grid;grid-template-columns:1fr 1fr;gap:18px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:14px}.adj label{display:flex;justify-content:space-between;font-size:.82rem;color:var(--mu);margin-bottom:6px}.adj input[type=range]{width:100%;accent-color:var(--ac)}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:16px}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.kl{font-size:.78rem;color:var(--mu);margin-bottom:6px}.kv{font:500 1.7rem/1.15 var(--mono);letter-spacing:-.02em}.ks{font-size:.82rem;color:var(--mu);margin-top:4px}
+.bg{display:inline-block;padding:2px 9px;border-radius:5px;font-size:.78rem;font-weight:600;color:var(--c);background:var(--t)}
+.gau{display:flex;align-items:center;gap:12px}.gau svg{width:104px;flex:none}
+.viz{display:grid;grid-template-columns:3fr 2fr;gap:12px;margin-bottom:12px}.viz h3,.led h3{margin:0 0 10px;font-size:.92rem}
+.cw{position:relative}#tt{position:absolute;pointer-events:none;background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.78rem;display:none;z-index:5;max-width:200px}
+.node{cursor:pointer;transition:r .15s ease-out}.node:hover{r:12}svg text{font-family:var(--mono);font-size:10px;fill:var(--mu)}svg .nt{fill:var(--ink);font-weight:500;pointer-events:none}
+.dn{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.dn svg{width:150px;flex:none}.lg{flex:1;min-width:140px;font-size:.85rem}.lg div{display:flex;justify-content:space-between;gap:10px;padding:3px 0}.lg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}.tabs button{border:1px solid transparent;background:transparent;border-radius:6px;padding:6px 12px;font-size:.84rem;color:var(--mu);transition:all .15s ease-out}.tabs button[aria-pressed=true]{background:var(--sf2);border-color:var(--bd);color:var(--ink)}
+.rw,.hd{display:grid;grid-template-columns:34px 1.8fr 1fr 90px 90px 1.1fr;gap:12px;align-items:center;padding:11px 12px;width:100%;text-align:left}
+.hd{font-size:.76rem;color:var(--mu);border-bottom:1px solid var(--bd);padding-top:4px}
+.it{border-bottom:1px solid var(--bd)}.it:last-child{border:0}.it[hidden]{display:none}
+.rw{background:transparent;border:0;border-radius:6px;transition:background .15s ease-out}.rw:hover,.it.hl .rw{background:var(--sf2)}.rn{color:var(--mu);font-size:.82rem}.fn{font-weight:500}
+.pn{display:grid;grid-template-rows:0fr;transition:grid-template-rows .15s ease-out}.it.op .pn{grid-template-rows:1fr}.pn>div{overflow:hidden}
+.pi{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:6px 14px 18px 58px}.pi h4{margin:0 0 4px;font-size:.76rem;font-weight:500;color:var(--mu)}.pi p,.pi ul{margin:0;font-size:.9rem}.pi ul{padding-left:16px}
+.sm{background:var(--sf2);border-left:3px solid var(--ac);padding:10px 14px;margin-bottom:12px;font-size:.92rem;border-radius:0 8px 8px 0}.ban{font-size:.78rem;color:var(--mu);margin-bottom:10px}
+.ld2{max-width:520px;margin:30px auto}.ld2 li{list-style:none;padding:7px 0;color:var(--mu);transition:color .15s}.ld2 li.a{color:var(--ink)}.ld2 li.d{color:var(--lo)}.ld2 li::before{content:"○ ";font-family:var(--mono)}.ld2 li.d::before{content:"✓ "}.ld2 li.a::before{content:"◉ "}
+.er{color:var(--hi);padding:20px 0}footer{border-top:1px solid var(--bd);margin-top:40px;padding:22px 0 50px;color:var(--mu);font-size:.82rem}
+dialog{background:var(--sf);color:var(--ink);border:1px solid var(--bd);border-radius:12px;max-width:560px;width:92%;padding:22px}dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin:0 0 8px}dialog h4{margin:14px 0 2px;font-size:.88rem}dialog p,dialog li{font-size:.9rem;color:var(--mu);margin:0}dialog ul{padding-left:18px;margin:4px 0}
+@media(max-width:900px){.kp{grid-template-columns:1fr 1fr}.viz{grid-template-columns:1fr}.fg{grid-template-columns:1fr 1fr}.pi{grid-template-columns:1fr;padding-left:14px}}
+@media(max-width:700px){.hd{display:none}.rw{grid-template-columns:28px 1fr auto;row-gap:2px}.rw .c,.rw .pr2{display:none}.adj{grid-template-columns:1fr}.nb.l{display:none}}
+@media(max-width:480px){.kp,.fg{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){#ld{display:none}.tr{animation:none;flex-wrap:wrap;width:auto}*{transition:none!important}}
+@media print{.nav,.hero,.tick,.cmd,.ex,.adj,.tabs,footer{display:none}.bar{position:static}.it .pn{grid-template-rows:1fr}.it[hidden]{display:block}}
+.cr{display:flex;gap:8px}.cr input{min-width:0}.cb{position:relative}.cb input[role=combobox]{text-overflow:ellipsis}
+.lb{position:absolute;left:0;top:calc(100% + 4px);min-width:100%;width:max-content;max-width:min(360px,88vw);max-height:240px;overflow:auto;margin:0;padding:4px;list-style:none;background:var(--sf);border:1px solid var(--bd);border-radius:8px;box-shadow:0 12px 32px rgba(0,0,0,.35);z-index:40}
+.lb li{padding:7px 10px;border-radius:6px;cursor:pointer;font-size:.9rem;color:var(--ink)}.lb li.on{background:var(--sf2)}.lb li.no{color:var(--mu);cursor:default}
+
+/* platform additions — retain the original visual system */
+.appview{padding:28px 0 20px}.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:0 0 20px}.pagehead h2{margin:0;font:800 clamp(2rem,5vw,3.5rem)/.9 var(--disp);text-transform:uppercase}.pagehead p{margin:7px 0 0;color:var(--mu)}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.stat .kv{font-size:1.5rem}.split{display:grid;grid-template-columns:1fr 1fr;gap:12px}.toolrow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.searchbox,.selectbox{background:var(--bg);color:var(--ink);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;font:inherit}.scenario-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px;border-bottom:1px solid var(--bd)}.scenario-item:last-child{border-bottom:0}.scenario-actions{display:flex;gap:5px;flex-wrap:wrap}.scenario-actions button{padding:5px 8px;font-size:.78rem}.empty{padding:28px;text-align:center;color:var(--mu)}.comparegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.comparecol{min-width:0}.reportcontent{line-height:1.65}.reportcontent h3{margin-top:22px}.nav button.active{color:var(--ink);background:var(--sf);border-color:var(--bd)}
+@media(max-width:900px){.pgrid{grid-template-columns:1fr 1fr}.split{grid-template-columns:1fr}}
+@media(max-width:700px){.nav nav{gap:2px}.nb{padding:6px 7px;font-size:.78rem}.nb.l{display:none}.scenario-item{align-items:flex-start;flex-direction:column}.comparegrid{grid-template-columns:1fr}}
+@media print{.appview:not(#reportsView){display:none!important}#reportsView{display:block!important}}
+</style>
+</head>
+<body>
+<div id="ld" aria-hidden="true"><span>Loading risks</span><b><i id="ldn" style="font-style:normal">0</i>%</b></div>
+
+<header class="nav"><div class="w nv">
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect width="22" height="22" rx="5" fill="#2563eb"/><path d="M5 15l4-5 3 3 5-7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Risk Analyser</div>
+  <nav>
+  <button class="nb" data-view="overview">Overview</button>
+  <button class="nb" data-view="analysis">New Analysis</button>
+  <button class="nb l" data-view="scenarios">My Scenarios</button>
+  <button class="nb l" data-view="compare">Compare</button>
+  <button class="nb l" data-view="reports">Reports</button>
+  <div class="dd"><button class="nb" id="svb" aria-expanded="false">More ▾</button><div id="svm" hidden></div></div>
+  <button class="nb" id="th" aria-label="Toggle light or dark theme">◐</button></nav>
+</div></header>
+
+<main class="w">
+  <section id="overviewView" class="appview" hidden></section>
+  <section id="scenariosView" class="appview" hidden></section>
+  <section id="compareView" class="appview" hidden></section>
+  <section id="reportsView" class="appview" hidden></section>
+  <section id="methodView" class="appview" hidden></section>
+  <section id="helpView" class="appview" hidden></section>
+  <section id="settingsView" class="appview" hidden></section>
+  <section id="intelligenceView" class="appview" hidden></section>
+  <section id="aboutView" class="appview" hidden></section>
+  <section id="analysisView" class="appview">
+  <section class="hero"><h1><span>What</span><span class="o">could go</span><span class="a">wrong?</span></h1>
+  <p class="lead">Describe a plan and get an executive risk dashboard: an overall score, capital at risk, a probability and impact matrix, and a detailed ledger with mitigations.</p></section>
+  <div class="tick" aria-hidden="true"><div class="tr" id="tr"></div></div>
+
+  <section class="cmd" aria-label="Scenario input">
+    <label class="t" for="sc">Describe your scenario</label>
+    <textarea id="sc" maxlength="1000" placeholder="e.g. I want to launch a direct-to-consumer shoe brand with $50,000 and sell online across Europe within 12 months."></textarea>
+    <div class="pr" id="pr"></div>
+    <details class="fp"><summary>Financial parameters (optional)</summary><div class="fg">
+      <div class="fld"><label for="cap">Capital available</label><div class="cr"><div class="cb" style="flex:0 0 42%"><input id="curi" role="combobox" aria-label="Currency (type a code or name)" aria-autocomplete="list" aria-expanded="false" aria-controls="curl" autocomplete="off" placeholder="Currency"><input type="hidden" id="cur" value="USD"><ul class="lb" id="curl" role="listbox" hidden></ul></div><input id="cap" type="number" min="0" step="1000" placeholder="50000"></div></div>
+      <div class="fld"><label for="tl">Target timeline</label><select id="tl"><option value="">Not specified</option><option>6 months</option><option>12 months</option><option>24 months</option><option>36+ months</option></select></div>
+      <div class="fld"><label for="se">Industry sector</label><input id="se" placeholder="e.g. Retail"></div>
+      <div class="fld"><label for="rg">Country</label><div class="cb"><input id="rgi" role="combobox" aria-label="Country (start typing to search)" aria-autocomplete="list" aria-expanded="false" aria-controls="rgl" autocomplete="off" placeholder="Start typing a country"><input type="hidden" id="rg" value=""><ul class="lb" id="rgl" role="listbox" hidden></ul></div></div></div></details>
+    <div class="act"><span class="ct m" id="ct">0 / 1000</span><button class="cta" id="go" type="button">Run Risk Analysis</button></div>
+  </section>
+
+  <section id="res" aria-live="polite"></section>
+  </section>
+</main>
+<footer><div class="w">Powered by AI.</div></footer>
+
+<dialog id="dlg"><h2>Methodology &amp; data sources</h2>
+<p>Each risk is given a probability (1 to 99%) and an impact (% of starting capital lost if it happens) by an AI model, based only on your description and any parameters you enter. No live market, price or company data is used, so treat every number as an informed estimate to challenge.</p>
+<h4>How the numbers are calculated</h4><ul><li>Exposure = probability × impact, per risk.</li><li>Overall score = sum of exposures, capped at 100. Labels: under 20 Low, under 45 Moderate, under 70 Elevated, else Critical.</li><li>Severity: exposure 10 or more High, 4 or more Medium, otherwise Low.</li><li>Capital at risk: from the probability-weighted total up to the combined impact of all risks with probability of 50% or more.</li><li>The stress slider scales every probability up or down.</li></ul>
+<h4>Limits</h4><p>Risks overlap, so totals are approximate. The sample shown at first load is illustrative only.</p>
+<p style="margin-top:16px"><button class="bt p" onclick="dlg.close()">Close</button></p></dialog>
+
+<script>
+var $=function(i){return document.getElementById(i)},dlg=$("dlg");
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+var GC={Financial:"#2563eb",Operational:"#0d9488",Market:"#8b5cf6",Regulatory:"#94a3b8"},GR=["Financial","Operational","Market","Regulatory"];
+var SAMPLE={title:"Starting a Direct-to-Consumer Shoe Business",sample:true,cap:50000,
+summary:"A direct-to-consumer shoe brand is most exposed to rising customer acquisition costs and tight cash flow from upfront manufacturing orders. Fit-related returns and supplier delays add pressure on a small capital base.",
+breakeven:{sensitivity:"High",note:"Breakeven depends on acquisition cost and how quickly inventory sells."},
+risks:[
+{factor:"Customer acquisition cost inflation",group:"Market",probability:70,impact:20,root_cause:"Paid social and search auctions get more expensive, and a new brand has little organic reach.",mitigation:"Build email and referral channels early, set a hard cost-per-acquisition ceiling, and test small before scaling spend.",metrics:["Blended acquisition cost","Repeat purchase rate"]},
+{factor:"Cash flow strain from upfront production",group:"Financial",probability:55,impact:25,root_cause:"Factories usually require deposits months before sales begin, tying up most of the starting capital.",mitigation:"Order small first runs, negotiate staged payments, and keep a cash reserve covering several months of costs.",metrics:["Months of runway","Inventory days on hand"]},
+{factor:"Overstock and fit-related returns",group:"Operational",probability:60,impact:18,root_cause:"Sizing is hard to judge online, so returns are high and unsold sizes pile up.",mitigation:"Use detailed size guides, pre-order drops, and a clear returns policy with restocking checks.",metrics:["Return rate","Sell-through by size"]},
+{factor:"Supplier delays and concentration",group:"Operational",probability:50,impact:15,root_cause:"Relying on one factory means quality issues or shipping delays can halt sales.",mitigation:"Qualify a backup supplier, agree delivery penalties, and add buffer time to launch dates.",metrics:["On-time delivery rate","Defect rate"]},
+{factor:"Competition from established brands",group:"Market",probability:60,impact:15,root_cause:"Large brands can discount heavily and outspend a new entrant on marketing.",mitigation:"Own a narrow niche with a clear story, and compete on fit and service rather than price.",metrics:["Gross margin","Share of branded search"]},
+{factor:"Import duties and customs changes",group:"Regulatory",probability:45,impact:10,root_cause:"Footwear tariffs and customs rules vary by country and can change at short notice.",mitigation:"Check duty codes before ordering, price with a margin buffer, and consider a customs broker.",metrics:["Landed cost per pair","Duty rate by market"]},
+{factor:"Data privacy and advertising rules",group:"Regulatory",probability:30,impact:8,root_cause:"Selling online means handling customer data and tracking, which privacy laws regulate.",mitigation:"Use a compliant consent tool, publish a clear privacy policy, and limit data collected.",metrics:["Consent rate","Open compliance tasks"]},
+{factor:"Payment holds and chargebacks",group:"Financial",probability:25,impact:6,root_cause:"New stores are treated as higher risk by payment processors, who may delay payouts.",mitigation:"Keep descriptions and delivery times accurate, respond to disputes quickly, and hold a cash buffer.",metrics:["Chargeback rate","Payout delay"]}]};
+var S={data:SAMPLE,stress:0,cap:50000,cur:"USD",filter:"All",open:{}};
+
+/* loader */
+(function(){var n=0;if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+var t=setInterval(function(){n+=Math.ceil(Math.random()*9)+3;if(n>=100){n=100;clearInterval(t);$("ldn").textContent=100;setTimeout(function(){$("ld").classList.add("done")},250);return}$("ldn").textContent=n},60)})();
+
+/* ticker */
+var TY=["Market risk","Credit risk","Liquidity risk","Operational risk","Interest rate risk","Inflation risk","Currency risk","Regulatory risk","Reinvestment risk","Systemic risk","Counterparty risk","Model risk","Settlement risk","Sovereign risk","Legal risk","Strategic risk","Reputational risk","Cyber risk","Commodity price risk"];
+$("tr").innerHTML=TY.concat(TY).map(function(t){return"<span>"+t+"</span>"}).join("");
+
+/* theme, modal, nav */
+$("th").onclick=function(){var d=document.documentElement,n=d.dataset.theme==="dark"?"light":"dark";d.dataset.theme=n;try{localStorage.setItem("ra_theme",n)}catch(e){}};
+if($("mtb"))$("mtb").onclick=function(){dlg.showModal()};
+$("sc").addEventListener("input",function(){$("ct").textContent=this.value.length+" / 1000"});
+[["Launch a SaaS startup","I want to launch a subscription software (SaaS) startup for small accounting firms."],["Open a local coffee shop","I want to open a local coffee shop in a busy city neighbourhood."],["Start an e-commerce shoe brand","I want to start an e-commerce shoe brand and sell directly to customers online."]].forEach(function(p){
+ var b=document.createElement("button");b.className="pill";b.type="button";b.textContent=p[0];b.onclick=function(){$("sc").value=p[1];$("sc").dispatchEvent(new Event("input"));$("sc").focus()};$("pr").appendChild(b)});
+
+
+/* Platform views and scenario tools */
+var currentView="analysis";
+function savedScore(s){try{return Math.min(100,Math.round(s.data.risks.reduce(function(a,r){return a+(Number(r.probability)||0)*(Number(r.impact)||0)/100},0)))}catch(e){return 0}}
+function savedLabel(score){return score<20?"Low":score<45?"Moderate":score<70?"Elevated":"Critical"}
+function navTo(view){currentView=view;["overview","analysis","scenarios","compare","reports","method","help","settings","intelligence","about"].forEach(function(v){var el=$(v==="method"?"methodView":v+"View");if(el)el.hidden=v!==view;});document.querySelectorAll("[data-view]").forEach(function(b){b.classList.toggle("active",b.dataset.view===view)});if(view==="overview")renderOverview();if(view==="scenarios")renderScenarios();if(view==="compare")renderCompare();if(view==="reports")renderReports();if(view==="method")renderMethod();if(view==="help")renderHelp();if(view==="settings")renderSettings();if(view==="intelligence")renderIntelligence();if(view==="about")renderAbout();$("svm").hidden=true;$(view==="analysis"?"analysisView":view==="method"?"methodView":view+"View").scrollIntoView({behavior:"smooth",block:"start"})}
+document.querySelectorAll("[data-view]").forEach(function(b){b.onclick=function(){navTo(b.dataset.view)}});
+function pageHead(title,desc,action){return'<div class="pagehead"><div><h2>'+title+'</h2><p>'+desc+'</p></div>'+(action||"")+'</div>'}
+function renderOverview(){var a=getSaved(),scores=a.map(savedScore),avg=scores.length?Math.round(scores.reduce((x,y)=>x+y,0)/scores.length):0,totalcap=a.reduce(function(s,x){return s+(Number(x.cap)||0)},0),currencies=Array.from(new Set(a.map(function(x){return x.cur||"USD"}))),critical=scores.filter(function(x){return x>=70}).length;
+var dist=["Low","Moderate","Elevated","Critical"].map(function(l){var n=scores.filter(function(x){return savedLabel(x)===l}).length;return'<div><span>'+l+'</span><span class="m">'+n+'</span></div>'}).join("");
+$("overviewView").innerHTML=pageHead("Overview","A snapshot of your saved risk analyses.",'<button class="bt p" onclick="navTo(\'analysis\')">＋ New analysis</button>')+
+(a.length?'<div class="pgrid"><div class="card stat"><div class="kl">Analyses completed</div><div class="kv">'+a.length+'</div></div><div class="card stat"><div class="kl">Average risk score</div><div class="kv">'+avg+' / 100</div><div class="ks">'+savedLabel(avg)+'</div></div><div class="card stat"><div class="kl">Capital analysed</div><div class="kv">'+(currencies.length===1?esc(currencies[0]+" "+totalcap.toLocaleString()):"Multiple currencies")+'</div><div class="ks">'+(currencies.length===1?"Total saved capital":"Capital totals kept separate by currency")+'</div></div><div class="card stat"><div class="kl">Critical scenarios</div><div class="kv">'+critical+'</div></div></div><div class="split"><div class="card"><h3>Risk distribution</h3>'+dist+'</div><div class="card"><h3>Recent analyses</h3>'+a.slice(0,5).map(function(s,i){return'<div class="scenario-item"><div><strong>'+esc(s.title)+'</strong><div class="ks">'+esc(s.date||"Saved scenario")+' · '+savedScore(s)+' / 100 · '+savedLabel(savedScore(s))+'</div></div><button class="bt" data-open="'+i+'">Open</button></div>'}).join("")+'</div></div>':'<div class="card empty"><h3>No saved analyses yet</h3><p>Run your first risk analysis and save it to populate your dashboard with your own data.</p><button class="bt p" onclick="navTo(\'analysis\')">Start an analysis</button></div>');
+$("overviewView").querySelectorAll("[data-open]").forEach(function(b){b.onclick=function(){openSaved(+b.dataset.open)}})}
+function openSaved(i){var a=getSaved(),s=a[i];if(!s)return;S.data=s.data;S.cap=Number(s.cap)||0;S.cur=s.cur||"USD";S.stress=0;S.filter="All";S.open={};$("sc").value=s.scenarioText||s.title;$("ct").textContent=$("sc").value.length+" / 1000";$("cap").value=s.cap||"";$("cur").value=s.cur||"USD";$("curi").value=s.cur||"USD";if(s.params){$("tl").value=s.params.timeline||"";$("se").value=s.params.sector||"";$("rg").value=s.params.region||"";$("rgi").value=s.params.region||""}draw();navTo("analysis")}
+function renderScenarios(){var a=getSaved();$("scenariosView").innerHTML=pageHead("My scenarios","Search, manage, revisit, and select saved assessments.")+'<div class="toolrow"><input class="searchbox" id="scenarioSearch" placeholder="Search scenarios…"><select class="selectbox" id="riskFilter"><option value="">All risk levels</option><option>Low</option><option>Moderate</option><option>Elevated</option><option>Critical</option></select></div><div class="card" id="scenarioList">'+(a.length?a.map(function(s,i){return'<div class="scenario-item" data-scenario-item data-search="'+esc((s.title+" "+(s.scenarioText||"")).toLowerCase())+'" data-risk="'+savedLabel(savedScore(s))+'"><div><strong>'+esc(s.title)+'</strong><div class="ks">'+esc(s.date||"Saved")+' · Score '+savedScore(s)+' · '+savedLabel(savedScore(s))+' · Capital '+esc((s.cur||"USD")+" "+(Number(s.cap)||0).toLocaleString())+'</div></div><div class="scenario-actions"><button class="bt" data-open="'+i+'">Open</button><button class="bt" data-rename="'+i+'">Rename</button><button class="bt" data-duplicate="'+i+'">Duplicate</button><button class="bt" data-select-compare="'+i+'">Compare</button><button class="bt" data-delete="'+i+'">Delete</button></div></div>'}).join(""):'<div class="empty">You have no saved scenarios yet.</div>')+'</div>';
+var search=$("scenarioSearch"),filter=$("riskFilter");function filtering(){var q=search.value.toLowerCase(),f=filter.value;document.querySelectorAll("[data-scenario-item]").forEach(function(el){el.hidden=!(el.dataset.search.includes(q)&&(!f||el.dataset.risk===f))})}search.oninput=filtering;filter.onchange=filtering;
+$("scenarioList").onclick=function(e){var b=e.target.closest("button");if(!b)return;var ix=+Object.keys(b.dataset).map(function(k){return b.dataset[k]}).filter(function(v){return /^\d+$/.test(v)})[0];var arr=getSaved();if(b.dataset.open!==undefined)openSaved(+b.dataset.open);if(b.dataset.rename!==undefined){var n=prompt("Rename scenario:",arr[ix].title);if(n&& n.trim()){arr[ix].title=n.trim();putSaved(arr);renderScenarios()}}if(b.dataset.duplicate!==undefined){var c=Object.assign({},arr[ix],{title:arr[ix].title+" (copy)",date:new Date().toLocaleDateString("en-GB")});arr.unshift(c);putSaved(arr);renderScenarios()}if(b.dataset.delete!==undefined&&confirm("Delete this saved scenario?")){arr.splice(+b.dataset.delete,1);putSaved(arr);renderScenarios()}if(b.dataset.selectCompare!==undefined){var picks=JSON.parse(localStorage.getItem("ra_compare")||"[]");if(!picks.includes(+b.dataset.selectCompare))picks.push(+b.dataset.selectCompare);localStorage.setItem("ra_compare",JSON.stringify(picks.slice(-4)));navTo("compare")}}}
+function renderCompare(){var a=getSaved(),picks=JSON.parse(localStorage.getItem("ra_compare")||"[]").filter(function(i){return a[i]});$("compareView").innerHTML=pageHead("Compare scenarios","Compare saved assessments side by side. Select up to four scenarios.")+'<div class="toolrow">'+a.map(function(s,i){return'<label class="pill"><input type="checkbox" data-compare-check="'+i+'" '+(picks.includes(i)?"checked":"")+' style="accent-color:var(--ac)"> '+esc(s.title)+'</label>'}).join("")+'<button class="bt" id="clearCompare">Clear selection</button></div><div id="compareContent"></div>';
+document.querySelectorAll("[data-compare-check]").forEach(function(c){c.onchange=function(){var ids=Array.from(document.querySelectorAll("[data-compare-check]:checked")).map(function(x){return +x.dataset.compareCheck}).slice(0,4);localStorage.setItem("ra_compare",JSON.stringify(ids));drawCompareContent(ids)}});$("clearCompare").onclick=function(){localStorage.setItem("ra_compare","[]");document.querySelectorAll("[data-compare-check]").forEach(function(c){c.checked=false});drawCompareContent([])};drawCompareContent(picks)}
+function drawCompareContent(ids){var a=getSaved();$("compareContent").innerHTML=ids.length?'<div class="comparegrid">'+ids.map(function(i){var s=a[i],score=savedScore(s);return'<div class="card comparecol"><h3>'+esc(s.title)+'</h3><div class="kv">'+score+' / 100</div><div class="ks">'+savedLabel(score)+'</div><p><strong>Capital:</strong> '+esc((s.cur||"USD")+" "+(Number(s.cap)||0).toLocaleString())+'</p><p><strong>Summary:</strong> '+esc(s.data.summary||"Not available")+'</p><h4>Top risks</h4><ol>'+s.data.risks.slice().sort(function(x,y){return y.probability*y.impact-x.probability*x.impact}).slice(0,5).map(function(r){return'<li>'+esc(r.factor)+' — '+r.probability+'% probability, '+r.impact+'% impact</li>'}).join("")+'</ol><h4>Risk categories</h4>'+GR.map(function(g){var v=s.data.risks.filter(function(r){return r.group===g}).reduce(function(t,r){return t+r.probability*r.impact/100},0);return'<div>'+g+': <span class="m">'+v.toFixed(1)+'</span></div>'}).join("")+'</div>'}).join("")+'</div>':'<div class="card empty">Choose saved scenarios above to compare them. You can select up to four.</div>'}
+function renderReports(){var a=getSaved();$("reportsView").innerHTML=pageHead("Reports","Generate a printable report from a saved analysis.")+(a.length?a.map(function(s,i){return'<div class="scenario-item"><div><strong>'+esc(s.title)+'</strong><div class="ks">'+esc(s.date||"Saved")+" · Score "+savedScore(s)+" · "+savedLabel(savedScore(s))+'</div></div><div class="scenario-actions"><button class="bt" data-report="'+i+'">Executive summary</button><button class="bt" data-fullreport="'+i+'">Full report</button></div></div>'}).join(""):'<div class="card empty">Save an analysis first to generate a report.</div>')+'<div id="reportOutput"></div>';
+$("reportsView").onclick=function(e){var b=e.target.closest("button");if(!b)return;var ix=+(b.dataset.report??b.dataset.fullreport),s=getSaved()[ix];if(!s)return;var full=b.dataset.fullreport!==undefined;var c=s.data.risks.map(function(r){return'<li><strong>'+esc(r.factor)+'</strong> ('+r.group+') — '+r.probability+'% probability; '+r.impact+'% impact.<br><em>'+esc(r.mitigation)+'</em></li>'});$("reportOutput").innerHTML='<article class="card reportcontent"><h2>'+esc(full?"Full Risk Assessment":"Executive Summary")+'</h2><h3>'+esc(s.title)+'</h3><p>Saved: '+esc(s.date||"")+' · Overall risk score: '+savedScore(s)+' / 100 ('+savedLabel(savedScore(s))+')</p><p><strong>Capital:</strong> '+esc((s.cur||"USD")+" "+(Number(s.cap)||0).toLocaleString())+'</p><p>'+esc(s.data.summary||"")+'</p>'+(full?'<h3>Risk register</h3><ol>'+c.join("")+'</ol>':'<h3>Priority risks</h3><ol>'+c.slice(0,3).join("")+'</ol>')+'<p><small>AI-generated estimates based on scenario inputs. Not financial advice; assumptions should be independently validated.</small></p><button class="bt p" onclick="window.print()">Print / Save as PDF</button></article>'}}
+function renderMethod(){$("methodView").innerHTML=pageHead("Methodology & data sources","How the current analysis engine estimates risk.")+'<div class="card reportcontent"><p>Risk estimates are generated by an AI model based on the scenario description and any parameters supplied. No live market, price, or company data is currently used.</p><h3>Calculations</h3><ul><li>Risk exposure = probability × impact.</li><li>Overall score = sum of risk exposures, capped at 100.</li><li>Labels: under 20 Low; under 45 Moderate; under 70 Elevated; otherwise Critical.</li><li>Severity: exposure 10 or more High, 4 or more Medium, otherwise Low.</li><li>Capital at risk is shown as a probability-weighted estimate and a high-side range based on risks with probability of 50% or more.</li><li>Stress slider scales probabilities.</li></ul><h3>Limitations</h3><p>Risks may overlap and totals are approximate. Estimates are not forecasts or financial advice. Validate assumptions with qualified professionals and relevant data.</p></div>'}
+function renderHelp(){$("helpView").innerHTML=pageHead("Help & support","Quick guidance for using Risk Analyser.")+'<div class="card reportcontent"><h3>Getting started</h3><ol><li>Describe your plan clearly in the analysis input.</li><li>Optionally provide capital, timeline, industry, and country.</li><li>Run analysis and review the dashboard, matrix, and risk ledger.</li><li>Save a scenario to revisit it, compare it, or generate a report.</li></ol><h3>Feedback</h3><p>For feedback or issues, use your project’s support/contact channel.</p><h3>About</h3><p>Risk Analyser provides AI-assisted scenario risk assessments to support—not replace—professional judgment.</p></div>'}
+function renderSettings(){$("settingsView").innerHTML=pageHead("Settings","Preferences available in this version.")+'<div class="card"><h3>Appearance</h3><p>Theme preference is saved locally in this browser.</p><button class="bt p" id="settingsTheme">Toggle light / dark theme</button><p class="ks">Current theme: '+esc(document.documentElement.dataset.theme||"dark")+'</p></div><div class="card" style="margin-top:12px"><h3>Data</h3><p>Saved scenarios are stored in this browser’s local storage. Clearing browser storage may remove them.</p></div>';$("settingsTheme").onclick=function(){$("th").click();renderSettings()}}
+function renderIntelligence(){$("intelligenceView").innerHTML=pageHead("Risk Intelligence","External intelligence is not connected yet.")+'<div class="card empty"><h3>Coming soon</h3><p>Country, industry, regulatory, economic, and geopolitical indicators will appear here once reliable data sources and update processes are integrated. No live data is shown at this stage.</p></div>'}
+function renderAbout(){$("aboutView").innerHTML=pageHead("About Risk Analyser","AI-assisted scenario risk analysis.")+'<div class="card reportcontent"><p>Risk Analyser helps users explore potential risks in business plans, projects, and other scenarios. It provides AI-generated estimates and structured mitigation ideas to support informed decisions.</p><p>It is not a substitute for professional financial, legal, or business advice.</p></div>'}
+
+
+/* saved scenarios */
+function getSaved(){try{return JSON.parse(localStorage.getItem("ra_saved")||"[]")}catch(e){return[]}}
+function putSaved(a){try{localStorage.setItem("ra_saved",JSON.stringify(a))}catch(e){}}
+function drawSaved(){var a=getSaved(),m=$("svm");var extra='<div class="si"><button data-nav="method">Methodology &amp; data sources</button></div><div class="si"><button data-nav="help">Help &amp; feedback</button></div><div class="si"><button data-nav="intelligence">Risk Intelligence</button><span class="x">Soon</span></div><div class="si"><button data-nav="settings">Settings</button></div><div class="si"><button data-nav="about">About</button></div><hr style="border-color:var(--bd)"><div class="em">Saved scenarios</div>';m.innerHTML=extra+(a.length?a.map(function(s,i){return'<div class="si"><button data-l="'+i+'">'+esc(s.title)+'<br><small style="color:var(--mu)">'+esc(s.date)+'</small></button><button class="x" data-d="'+i+'" aria-label="Delete">✕</button></div>'}).join(""):'<div class="em">No saved scenarios yet. Run an analysis, then choose Save scenario.</div>')}
+$("svb").onclick=function(e){e.stopPropagation();var m=$("svm");drawSaved();m.hidden=!m.hidden;this.setAttribute("aria-expanded",String(!m.hidden))};
+document.addEventListener("click",function(e){if(!e.target.closest(".dd"))$("svm").hidden=true});
+$("svm").onclick=function(e){var a=getSaved(),l=e.target.closest("[data-l]"),d=e.target.closest("[data-d]"),nv=e.target.closest("[data-nav]");
+ if(nv){var v=nv.dataset.nav;if(v==="method")navTo("method");else if(v==="help")navTo("help");else if(v==="intelligence")navTo("intelligence");else if(v==="settings")navTo("settings");else if(v==="about")navTo("about");return}
+ if(l){var s=a[+l.dataset.l];S.data=s.data;S.cap=s.cap;if(s.cur)S.cur=s.cur;S.stress=0;S.filter="All";S.open={};$("svm").hidden=true;draw()}
+ if(d){a.splice(+d.dataset.d,1);putSaved(a);drawSaved()}};
+
+/* calculations */
+var sevOf=function(e){return e>=10?"High":e>=4?"Medium":"Low"};
+function calc(){var d=S.data,k=1+S.stress/100;
+ var rs=d.risks.map(function(r){var p=Math.min(99,Math.max(1,r.probability*k)),e=p*r.impact/100;return Object.assign({},r,{p:p,e:e,sev:sevOf(e)})}).sort(function(a,b){return b.e-a.e});
+ rs.forEach(function(r,i){r.n=i+1});
+ var tot=rs.reduce(function(s,r){return s+r.e},0),score=Math.min(100,Math.round(tot)),g={};GR.forEach(function(x){g[x]=0});rs.forEach(function(r){g[r.group]+=r.e});
+ var top=GR.slice().sort(function(a,b){return g[b]-g[a]})[0],hiEnd=Math.min(100,rs.filter(function(r){return r.p>=50}).reduce(function(s,r){return s+r.impact},0)),lo=Math.min(100,tot);
+ return{rs:rs,tot:tot,score:score,label:score<20?"Low":score<45?"Moderate":score<70?"Elevated":"Critical",g:g,top:top,lo:lo,hi:Math.max(lo,hiEnd),
+  topShare:tot?g[top]/tot*100:0,topRisk:rs[0]}}
+var _cs={},curSym=function(){var c=S.cur||"USD";if(_cs[c]!==undefined)return _cs[c];var t=c+" ";try{t=new Intl.NumberFormat("en-GB",{style:"currency",currency:c,currencyDisplay:"narrowSymbol"}).formatToParts(0).filter(function(x){return x.type==="currency"})[0].value;if(t.length>1)t+=" "}catch(e){}return _cs[c]=t};
+var usd=function(n){return(n<0?"-":"")+curSym()+Math.abs(Math.round(n)).toLocaleString("en-GB")};
+var gcol=function(s){return s<20?"var(--lo)":s<45?"var(--md)":"var(--hi)"};
+
+/* drawing */
+function draw(){var c=calc(),d=S.data,cap=S.cap>0?S.cap:0;
+ var H='<div class="bar"><h2>'+esc(d.title)+'<small>'+(d.sample?"Sample analysis with illustrative figures. Run your own scenario above.":"AI-generated estimates, "+new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}))+'</small></h2><div class="ex">'+
+ '<button class="bt" id="bAdj">Adjust variables</button><button class="bt" id="bSave">Save scenario</button><button class="bt" id="bMd">Copy Markdown</button><button class="bt p" id="bPdf">Export PDF brief</button></div></div>';
+ H+='<div class="adj" id="adj" hidden><div><label>Capital available<span class="m" id="cv">'+(cap?usd(cap):"not set")+'</span></label><input type="number" id="adjCap" min="0" step="1000" class="" style="width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--bd);border-radius:8px;padding:8px 10px" value="'+(cap||"")+'"></div>'+
+ '<div><label>Stress test: scale all probabilities<span class="m" id="sv">'+(S.stress>0?"+":"")+S.stress+'%</span></label><input type="range" id="adjStr" min="-50" max="50" step="5" value="'+S.stress+'"></div></div>';
+ if(d.summary)H+='<div class="sm">'+esc(d.summary)+'</div>';
+ var arc=Math.PI*50;
+ H+='<div class="kp"><div class="card"><div class="kl">Overall risk score</div><div class="gau"><svg viewBox="0 0 120 70" aria-hidden="true"><path d="M10 62A50 50 0 0 1 110 62" fill="none" stroke="var(--bd)" stroke-width="10" stroke-linecap="round"/><path d="M10 62A50 50 0 0 1 110 62" fill="none" stroke="'+gcol(c.score)+'" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+(c.score/100*arc).toFixed(1)+' '+arc.toFixed(1)+'"/></svg><div><div class="kv">'+c.score+'<span style="font-size:.9rem;color:var(--mu)"> / 100</span></div><div class="ks">'+c.label+'</div></div></div></div>'+
+ '<div class="card"><div class="kl">Estimated capital at risk</div><div class="kv" style="font-size:1.35rem">'+(cap?usd(cap*c.lo/100)+" – "+usd(cap*c.hi/100):c.lo.toFixed(0)+"% – "+c.hi.toFixed(0)+"%")+'</div><div class="ks">'+(cap?c.lo.toFixed(0)+"% – "+c.hi.toFixed(0)+"% of capital":"Enter capital in Adjust variables for dollars")+'</div></div>'+
+ '<div class="card"><div class="kl">Primary vulnerability</div><div class="kv" style="font-size:1.35rem;font-family:var(--ui);font-weight:600">'+c.top+'</div><div class="ks"><span class="m">'+c.topShare.toFixed(0)+'%</span> of total exposure. Largest: '+esc(c.topRisk.factor)+'</div></div>'+
+ '<div class="card"><div class="kl">Time-to-breakeven risk</div><div class="kv" style="font-size:1.35rem"><span class="bg sev-'+(d.breakeven.sensitivity==="High"?"High":d.breakeven.sensitivity==="Low"?"Low":"Medium")+'" style="font-size:1rem;padding:4px 12px">'+esc(d.breakeven.sensitivity)+' sensitivity</span></div><div class="ks">'+esc(d.breakeven.note||"")+'</div></div></div>';
+ /* matrix */
+ var X=function(p){return 44+p/100*340},Y=function(i){return 220-i/60*205};
+ var mx='<svg viewBox="0 0 400 250" role="img" aria-label="Risk matrix of probability against impact"><rect x="44" y="15" width="340" height="205" fill="none" stroke="var(--bd)"/>';
+ [25,50,75].forEach(function(v){mx+='<line x1="'+X(v)+'" x2="'+X(v)+'" y1="15" y2="220" stroke="var(--bd)" stroke-dasharray="2 4"/>'});[15,30,45].forEach(function(v){mx+='<line y1="'+Y(v)+'" y2="'+Y(v)+'" x1="44" x2="384" stroke="var(--bd)" stroke-dasharray="2 4"/>'});
+ mx+='<rect x="'+X(50)+'" y="15" width="'+(384-X(50))+'" height="'+(Y(30)-15)+'" fill="rgba(239,68,68,.07)"/><text x="214" y="240" text-anchor="middle">Probability (%)</text><text x="12" y="120" transform="rotate(-90 12 120)" text-anchor="middle">Impact (% of capital)</text>';
+ [0,50,100].forEach(function(v){mx+='<text x="'+X(v)+'" y="232" text-anchor="middle">'+v+'</text>'});[0,30,60].forEach(function(v){mx+='<text x="38" y="'+(Y(v)+3)+'" text-anchor="end">'+v+'</text>'});
+ c.rs.forEach(function(r){mx+='<g class="sev-'+r.sev+'"><circle class="node" data-n="'+r.n+'" cx="'+X(r.p).toFixed(1)+'" cy="'+Y(r.impact).toFixed(1)+'" r="9" fill="var(--t)" stroke="var(--c)" stroke-width="1.5"/><text class="nt" x="'+X(r.p).toFixed(1)+'" y="'+(Y(r.impact)+3.5).toFixed(1)+'" text-anchor="middle">'+r.n+'</text></g>'});
+ mx+="</svg>";
+ /* donut */
+ var C=2*Math.PI*40,off=0,dn='<svg viewBox="0 0 100 100" role="img" aria-label="Exposure by category"><g transform="rotate(-90 50 50)">';
+ GR.forEach(function(x){var l=c.tot?c.g[x]/c.tot*C:0;dn+='<circle cx="50" cy="50" r="40" fill="none" stroke="'+GC[x]+'" stroke-width="14" stroke-dasharray="'+l.toFixed(1)+' '+(C-l).toFixed(1)+'" stroke-dashoffset="'+(-off).toFixed(1)+'"/>';off+=l});
+ dn+='</g><text x="50" y="54" text-anchor="middle" class="nt" style="font-size:13px">'+c.score+'</text></svg>';
+ var lg=GR.map(function(x){return'<div><span><i style="background:'+GC[x]+'"></i>'+x+'</span><span class="m">'+(c.tot?(c.g[x]/c.tot*100).toFixed(0):0)+'%</span></div>'}).join("");
+ H+='<div class="viz"><div class="card cw"><h3>Risk matrix: probability vs. impact</h3>'+mx+'<div id="tt"></div></div><div class="card"><h3>Exposure by category</h3><div class="dn">'+dn+'<div class="lg">'+lg+'</div></div></div></div>';
+ /* ledger */
+ var tabs=["All"].concat(GR).map(function(t){return'<button data-t="'+t+'" aria-pressed="'+(S.filter===t)+'">'+t+(t==="All"?" risks":"")+'</button>'}).join("");
+ var rows=c.rs.map(function(r){return'<div class="it'+(S.open[r.factor]?" op":"")+'" data-g="'+r.group+'" id="row'+r.n+'" '+(S.filter!=="All"&&S.filter!==r.group?"hidden":"")+'><button class="rw" aria-expanded="'+!!S.open[r.factor]+'"><span class="rn m">'+r.n+'</span><span class="fn">'+esc(r.factor)+'</span><span class="c">'+r.group+'</span><span><span class="bg sev-'+r.sev+'">'+r.sev+'</span></span><span class="m pr2">'+r.p.toFixed(0)+'%</span><span class="m">'+r.impact+'%'+(cap?" · "+usd(cap*r.impact/100):"")+'</span></button>'+
+ '<div class="pn"><div><div class="pi"><div><h4>Root cause</h4><p>'+esc(r.root_cause)+'</p></div><div><h4>Mitigation strategy</h4><p>'+esc(r.mitigation)+'</p></div><div><h4>Metrics to watch</h4><ul>'+(r.metrics||[]).map(function(m){return"<li>"+esc(m)+"</li>"}).join("")+'</ul></div></div></div></div></div>'}).join("");
+ H+='<div class="card led"><h3>Detailed risk ledger</h3><div class="tabs">'+tabs+'</div><div class="hd"><span>#</span><span>Risk factor</span><span class="c">Category</span><span>Severity</span><span class="pr2">Probability</span><span>Est. impact</span></div>'+rows+'</div>';
+ $("res").innerHTML=H;
+ /* wiring */
+ $("bPdf").onclick=function(){window.print()};
+ $("bAdj").onclick=function(){$("adj").hidden=!$("adj").hidden};
+ $("adjCap").onchange=function(){S.cap=+this.value||0;keep()};$("adjStr").oninput=function(){S.stress=+this.value;keep()};
+ $("bMd").onclick=function(){var t=toMd(c),b=this;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent="Copied"},function(){b.textContent="Copy failed"});setTimeout(function(){b.textContent="Copy Markdown"},1800)};
+ $("bSave").onclick=function(){var a=getSaved();a.unshift({id:Date.now(),title:d.title.slice(0,70),scenarioText:$("sc").value,date:new Date().toLocaleDateString("en-GB"),data:d,cap:S.cap,cur:S.cur,params:{timeline:$("tl").value,sector:$("se").value,region:$("rg").value}});putSaved(a.slice(0,30));renderOverview();renderScenarios();renderReports();this.textContent="Saved";var b=this;setTimeout(function(){b.textContent="Save scenario"},1800)};
+ document.querySelectorAll(".tabs button").forEach(function(b){b.onclick=function(){S.filter=this.dataset.t;document.querySelectorAll(".tabs button").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});document.querySelectorAll(".it").forEach(function(r){r.hidden=S.filter!=="All"&&r.dataset.g!==S.filter})}});
+ document.querySelectorAll(".rw").forEach(function(b){b.onclick=function(){var it=b.parentNode,name=b.querySelector(".fn").textContent,o=it.classList.toggle("op");S.open[name]=o;b.setAttribute("aria-expanded",String(o))}});
+ var tt=$("tt"),box=tt.parentNode;
+ document.querySelectorAll(".node").forEach(function(n){var r=c.rs[n.dataset.n-1];
+  n.onmousemove=function(e){var q=box.getBoundingClientRect();tt.style.display="block";tt.style.left=Math.min(e.clientX-q.left+12,q.width-200)+"px";tt.style.top=(e.clientY-q.top+12)+"px";tt.innerHTML="<b>"+esc(r.factor)+"</b><br><span class='m'>"+r.p.toFixed(0)+"% likely, "+r.impact+"% impact</span>"};
+  n.onmouseleave=function(){tt.style.display="none"};
+  n.onclick=function(){var it=$("row"+r.n);it.classList.add("op","hl");it.querySelector(".rw").setAttribute("aria-expanded","true");S.open[r.factor]=true;if(it.hidden){it.hidden=false}it.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(function(){it.classList.remove("hl")},1400)}})}
+function keep(){var id=document.activeElement&&document.activeElement.id;draw();$("adj").hidden=false;if(id==="adjStr")$(id).focus()}
+function toMd(c){var d=S.data,cap=S.cap>0?S.cap:0,m="# Risk analysis: "+d.title+"\n\n";
+ m+="**Overall risk score:** "+c.score+" / 100 ("+c.label+")  \n**Capital at risk:** "+(cap?usd(cap*c.lo/100)+" – "+usd(cap*c.hi/100)+" (":"")+c.lo.toFixed(0)+"% – "+c.hi.toFixed(0)+"% of capital"+(cap?")":"")+"  \n**Primary vulnerability:** "+c.top+"  \n**Time-to-breakeven sensitivity:** "+d.breakeven.sensitivity+"\n\n";
+ if(d.summary)m+=d.summary+"\n\n";
+ m+="| # | Risk factor | Category | Severity | Probability | Impact |\n|---|---|---|---|---|---|\n";
+ c.rs.forEach(function(r){m+="| "+r.n+" | "+r.factor+" | "+r.group+" | "+r.sev+" | "+r.p.toFixed(0)+"% | "+r.impact+"% |\n"});
+ m+="\n";c.rs.forEach(function(r){m+="### "+r.n+". "+r.factor+"\n- Root cause: "+r.root_cause+"\n- Mitigation: "+r.mitigation+"\n- Metrics to watch: "+(r.metrics||[]).join("; ")+"\n\n"});
+ return m+"_AI-generated estimates, not financial advice._\n"}
+
+/* analysis */
+var STEPS=["Evaluating market saturation","Calculating supply chain volatility","Modeling cash flow burn","Weighing regulatory exposure","Ranking risks by expected loss"];
+function loading(){var i=0;$("res").innerHTML='<ul class="ld2" id="stp">'+STEPS.map(function(s){return"<li>"+s+"…</li>"}).join("")+"</ul>";
+ var li=document.querySelectorAll("#stp li");li[0].className="a";
+ return setInterval(function(){if(i<li.length-1){li[i].className="d";i++;li[i].className="a"}},2600)}
+async function run(){var text=$("sc").value.trim();
+ if(!text){$("res").innerHTML='<p class="er">Describe a scenario first, then select Run Risk Analysis.</p>';$("res").scrollIntoView({behavior:"smooth"});return}
+ var btn=$("go");btn.disabled=true;$("res").scrollIntoView({behavior:"smooth",block:"start"});var t=loading();
+ var cap=+$("cap").value||0,params={capital:cap||"",timeline:$("tl").value,sector:$("se").value,region:$("rg").value,currency:$("cur").value};
+ try{var r=await fetch("/api/analyse",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scenario:text,params:params})});var d=await r.json();
+  if(!r.ok||!d.risks){$("res").innerHTML='<p class="er">'+esc(d.error||"The analysis failed. Please try again.")+"</p>"}
+  else{d.title=text.length>80?text.slice(0,77)+"…":text;S.data=d;S.cap=cap;S.cur=$("cur").value;S.stress=0;S.filter="All";S.open={};draw()}}
+ catch(e){$("res").innerHTML='<p class="er">Could not reach the analysis service. Check your connection and try again.</p>'}
+ clearInterval(t);btn.disabled=false}
+$("go").onclick=run;
+
+/* country and currency lists with type-to-filter search */
+(function(){
+ var norm=function(t){return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()};
+ function combo(id,items,opt){
+  var inp=$(id+"i"),hid=$(id),ul=$(id+"l"),act=-1,shown=[],last="";
+  items.forEach(function(it){it.n=norm(it.l)});
+  function open(v){ul.hidden=!v;inp.setAttribute("aria-expanded",String(v))}
+  function mark(i){act=i;[].forEach.call(ul.children,function(li,k){li.className=k===i?"on":"";if(k===i){li.scrollIntoView({block:"nearest"});inp.setAttribute("aria-activedescendant",li.id)}});if(i<0)inp.removeAttribute("aria-activedescendant")}
+  function render(q){q=norm(q.trim());
+   shown=items.map(function(it){var i=q?it.n.indexOf(q):0,r=i<0?-1:i===0?0:/[\s(\-]/.test(it.n.charAt(i-1))?1:2;return{it:it,r:r}}).filter(function(x){return x.r>=0}).sort(function(a,b){return a.r-b.r}).map(function(x){return x.it}).slice(0,250);
+   ul.innerHTML=shown.length?shown.map(function(it,i){return'<li role="option" id="'+id+'-o'+i+'" data-i="'+i+'">'+esc(it.l)+'</li>'}).join(""):'<li class="no">No matches</li>';
+   var sel=-1;if(!q)shown.forEach(function(it,i){if(it.v===hid.value)sel=i});mark(q&&shown.length?0:sel)}
+  function choose(it){hid.value=it.v;inp.value=last=it.s||it.l;open(false)}
+  function commit(){var q=norm(inp.value.trim()),ex=items.filter(function(it){return it.n===q||String(it.v).toLowerCase()===q})[0];
+   if(ex)choose(ex);else if(q&&inp.value!==last&&shown.length)choose(shown[0]);else if(!q&&!opt.required){hid.value="";inp.value=last=""}else inp.value=last;open(false)}
+  inp.addEventListener("focus",function(){inp.select();render("");open(true)});
+  inp.addEventListener("input",function(){render(inp.value);open(true)});
+  inp.addEventListener("blur",commit);
+  inp.addEventListener("keydown",function(e){var k=e.key;
+   if(k==="ArrowDown"||k==="ArrowUp"){e.preventDefault();if(ul.hidden){render(inp.value===last?"":inp.value);open(true)}else if(shown.length)mark((act+(k==="ArrowDown"?1:-1)+shown.length)%shown.length)}
+   else if(k==="Enter"&&!ul.hidden){e.preventDefault();if(act>=0&&shown[act])choose(shown[act])}
+   else if(k==="Escape"){inp.value=last;open(false)}});
+  ul.addEventListener("mousedown",function(e){var li=e.target.closest("li[data-i]");e.preventDefault();if(li)choose(shown[+li.dataset.i])});
+  return{set:function(v){var it=items.filter(function(x){return x.v===v})[0];if(it)choose(it)}}}
+
+ /* countries: ISO 3166-1 codes, names from the browser's built-in data */
+ var CC="AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW XK".split(" ");
+ var dn=null,cn=null;try{dn=new Intl.DisplayNames(["en"],{type:"region"});cn=new Intl.DisplayNames(["en"],{type:"currency"})}catch(e){}
+ var names=[];CC.forEach(function(c){var n=c;try{if(dn)n=dn.of(c)||c}catch(e){}if(!dn||n!==c)names.push(n)});
+ names.sort(function(a,b){return a.localeCompare(b,"en")});
+ combo("rg",names.map(function(n){return{v:n,l:n}}),{required:false});
+
+ /* currencies: only those in current use (ISO 4217 active list, after Bulgaria joined the euro on 1 Jan 2026) */
+ var CUR="AED AFN ALL AMD AOA ARS AUD AWG AZN BAM BBD BDT BHD BIF BMD BND BOB BRL BSD BTN BWP BYN BZD CAD CDF CHF CLP CNY COP CRC CUP CVE CZK DJF DKK DOP DZD EGP ERN ETB EUR FJD FKP GBP GEL GHS GIP GMD GNF GTQ GYD HKD HNL HTG HUF IDR ILS INR IQD IRR ISK JMD JOD JPY KES KGS KHR KMF KPW KRW KWD KYD KZT LAK LBP LKR LRD LSL LYD MAD MDL MGA MKD MMK MNT MOP MRU MUR MVR MWK MXN MYR MZN NAD NGN NIO NOK NPR NZD OMR PAB PEN PGK PHP PKR PLN PYG QAR RON RSD RUB RWF SAR SBD SCR SDG SEK SGD SHP SLE SOS SRD SSP STN SVC SYP SZL THB TJS TMT TND TOP TRY TTD TWD TZS UAH UGX USD UYU UZS VES VND VUV WST XAF XCD XCG XOF XPF YER ZAR ZMW ZWG".split(" ");
+ var NM={XCG:"Caribbean Guilder",ZWG:"Zimbabwe Gold (ZiG)",SLE:"Sierra Leonean Leone",MRU:"Mauritanian Ouguiya",STN:"Sao Tome and Principe Dobra",VES:"Venezuelan Bolivar"};
+ var cur=CUR.map(function(c){var n="";try{n=cn?cn.of(c):""}catch(e){}if(!n||n===c)n=NM[c]||"";return{v:c,s:c,l:n?c+" - "+n:c}});
+ var cb=combo("cur",cur,{required:true});cb.set("USD");
+ window.__lists={countries:names.length,currencies:cur.length};
+})();
+draw();
+</script>
+</body>
+</html>
