@@ -4,7 +4,7 @@
 
 Live site: https://risk-analyser.pages.dev/
 
-**Status:** In active development. The current version works end to end, but it relies on AI-generated estimates. 
+**Status:** `In active development`. The current version works end to end, but it relies on AI-generated estimates. 
 
 **Where this is heading:** Eventually the goal is to pair a top financial reasoning model with code execution, so that code handles the math while the AI handles scenario parsing and mitigation planning. These plans are underway.
 
