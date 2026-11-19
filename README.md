@@ -106,10 +106,10 @@ Probability is an AI estimate from 1% to 99%. Impact is an AI estimate from 1% t
 
 Risk Analyser is still being developed. Planned improvements:
 
-- [ ] **Real-time and official data.** Today the assessment relies on AI-generated responses. The aim is to ground it in sourced, dated data (for example inflation, interest rates, growth and exchange rates by country) and to build out the Risk Intelligence section, with every figure showing its source.
-- [ ] **Interactive chatbot.** An assistant that answers users' questions about their results, their risks and how the platform works.
-- [ ] **In-depth quantitative risk modelling.** Assessing each risk in more depth with quantitative methods such as Monte Carlo simulation, to move beyond single-point AI estimates to ranges and probabilities.
-- [ ] **Design upgrades.** Continued improvements to the layout, visuals and overall user experience.
+- **Real-time and official data.** Today the assessment relies on AI-generated responses. The aim is to ground it in sourced, dated data (for example inflation, interest rates, growth and exchange rates by country) and to build out the Risk Intelligence section, with every figure showing its source.
+- **Interactive chatbot.** An assistant that answers users' questions about their results, their risks and how the platform works.
+- **In-depth quantitative risk modelling.** Assessing each risk in more depth with quantitative methods such as Monte Carlo simulation, to move beyond single-point AI estimates to ranges and probabilities.
+- **Design upgrades.** Continued improvements to the layout, visuals and overall user experience.
 
 ## Limitations and responsible use
 
