@@ -4,9 +4,9 @@
 
 Live site: https://risk-analyser.pages.dev/
 
-**Status: in active development.** The current version works end to end, but it relies on AI-generated estimates. See [Roadmap](#roadmap) for what is coming next.
+**Status:** In active development. The current version works end to end, but it relies on AI-generated estimates. 
 
-**Where this is heading.** Eventually the goal is to pair a top financial reasoning model with code execution, so that code handles the math while the AI handles scenario parsing and mitigation planning. These plans are underway.
+**Where this is heading:** Eventually the goal is to pair a top financial reasoning model with code execution, so that code handles the math while the AI handles scenario parsing and mitigation planning. These plans are underway.
 
 **Knowledge cutoffs.** Most models used in this website are outdated in terms of knowledge, with some having a knowledge cutoff as early as December 2023. Results may therefore not reflect recent events, regulations or market conditions.
 
