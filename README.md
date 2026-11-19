@@ -12,7 +12,7 @@ Live site: https://risk-analyser.pages.dev/
 
 **Consistency.** For more consistent answers, we have lowered the temperature to around 0.2 to 0.4.
 
----
+
 
 ## Aim
 
