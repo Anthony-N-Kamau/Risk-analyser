@@ -2,7 +2,7 @@
 
 **An AI-assisted web app that gives a clear overview and assessment of the risks in any plan or decision.**
 
-Live site: https://risk-analyser.pages.dev/
+Live site: https://4c1e3c78.risk-analyser.pages.dev/
 
 **Status:** `In active development`. The current version works end to end, but it relies on AI-generated estimates. 
 
